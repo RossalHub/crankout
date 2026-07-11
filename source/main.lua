@@ -11,11 +11,25 @@ import "CoreLibs/ui"
 -- Localizing commonly used globals
 local pd <const> = playdate
 local gfx <const> = playdate.graphics
+local vector2D <const> = playdate.geometry.vector2D
+
+
+-- Define constants
+SCREEN_SIZE = vector2D.new(400, 240)
 
 -- Defining player variables
 local playerSize = 10
 local playerVelocity = 3
 local playerX, playerY = 200, 120
+
+
+-- Define ball variables
+local ballPosition = vector2D.new(50, 50)
+local ballVel = vector2D.new(5, 5)
+local ballImage = gfx.image.new("images/circle_32x32_black")
+local ballSize = vector2D.new(32,32)
+local ballBounceSpeedModifier = 0.98
+
 
 -- Drawing player image
 local playerImage = gfx.image.new(32, 32)
@@ -47,6 +61,19 @@ local function ring(value, min, max)
 	return min + (value - min) % (max - min)
 end
 
+-- Assume image is centered (Anchored 0.5, 0.5)
+local function bounce_off_walls(position, velocity, size, speedModifier)
+    if (position.dx - size.dx/2 < 0) then
+        velocity.dx = -velocity.dx * speedModifier
+    elseif (position.dx + size.dx/2 > SCREEN_SIZE.dx) then
+        velocity.dx = -velocity.dx * speedModifier
+    end
+    if (position.dy - size.dy/2 < 0) then
+        velocity.dy = -velocity.dy * speedModifier
+    elseif (position.dy + size.dy/2 > SCREEN_SIZE.dy) then
+        velocity.dy = -velocity.dy * speedModifier
+    end
+end
 -- playdate.update function is required in every project!
 function playdate.update()
     -- Clear screen
@@ -63,11 +90,21 @@ function playdate.update()
         playerX += xVelocity
         playerY += yVelocity
         -- Loop player position
-        playerX = ring(playerX, -playerSize, 400 + playerSize)
-        playerY = ring(playerY, -playerSize, 240 + playerSize)
+        playerX = ring(playerX, -playerSize, SCREEN_SIZE.dx + playerSize)
+        playerY = ring(playerY, -playerSize, SCREEN_SIZE.dy + playerSize)
     end
+    -- Move ball 
+    ballPosition.dx += ballVel.dx
+    ballPosition.dy += ballVel.dy
+    bounce_off_walls(ballPosition, ballVel, ballSize, ballBounceSpeedModifier)
+
+
+    ----- Draw Stuff -----
     -- Draw text
     gfx.drawTextAligned("Template configured!", 200, 30, kTextAlignment.center)
     -- Draw player
     playerImage:drawAnchored(playerX, playerY, 0.5, 0.5)
+    -- Draw ball 
+    ballImage:drawAnchored(ballPosition.dx, ballPosition.dy, 0.5, 0.5)
+
 end
