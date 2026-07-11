@@ -12,6 +12,7 @@ import "CoreLibs/ui"
 local pd <const> = playdate
 local gfx <const> = playdate.graphics
 local vector2D <const> = playdate.geometry.vector2D
+local sampleplayer <const> = playdate.sound.sampleplayer
 
 
 -- Define constants
@@ -29,6 +30,7 @@ local ballVel = vector2D.new(5, 5)
 local ballImage = gfx.image.new("images/circle_32x32_black")
 local ballSize = vector2D.new(32,32)
 local ballBounceSpeedModifier = 0.98
+local ballBounceSoundEffect = sampleplayer.new("sound/wall_bounce")
 
 
 -- Drawing player image
@@ -65,14 +67,19 @@ end
 local function bounce_off_walls(position, velocity, size, speedModifier)
     if (position.dx - size.dx/2 < 0) then
         velocity.dx = -velocity.dx * speedModifier
+        return true
     elseif (position.dx + size.dx/2 > SCREEN_SIZE.dx) then
         velocity.dx = -velocity.dx * speedModifier
+        return true
     end
     if (position.dy - size.dy/2 < 0) then
         velocity.dy = -velocity.dy * speedModifier
+        return true
     elseif (position.dy + size.dy/2 > SCREEN_SIZE.dy) then
         velocity.dy = -velocity.dy * speedModifier
+        return true
     end
+    return false
 end
 -- playdate.update function is required in every project!
 function playdate.update()
@@ -96,7 +103,9 @@ function playdate.update()
     -- Move ball 
     ballPosition.dx += ballVel.dx
     ballPosition.dy += ballVel.dy
-    bounce_off_walls(ballPosition, ballVel, ballSize, ballBounceSpeedModifier)
+    if bounce_off_walls(ballPosition, ballVel, ballSize, ballBounceSpeedModifier) then
+        ballBounceSoundEffect:play()
+    end
 
 
     ----- Draw Stuff -----
