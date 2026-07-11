@@ -17,6 +17,8 @@ local sampleplayer <const> = playdate.sound.sampleplayer
 
 -- Define constants
 SCREEN_SIZE = vector2D.new(400, 240)
+Font = playdate.graphics.font.new("fonts/yoster")
+
 
 -- Defining player variables
 local playerSize = 10
@@ -25,13 +27,30 @@ local playerX, playerY = 200, 120
 
 
 -- Define ball variables
-local ballPosition = vector2D.new(50, 50)
+local ballPosition = vector2D.new(50, 100)
 local ballVel = vector2D.new(5, 5)
 local ballImage = gfx.image.new("images/circle_32x32_black")
 local ballSize = vector2D.new(32,32)
 local ballBounceSpeedModifier = 0.98
 local ballBounceSoundEffect = sampleplayer.new("sound/wall_bounce")
+BallBounds = {vector2D.new(0,42), SCREEN_SIZE} -- Used as walls for ball
 
+-- UI
+local blocks_destroyed = 0
+local blocks_remaining = 0
+local UIBoxImage = gfx.image.new(SCREEN_SIZE.dx, SCREEN_SIZE.dy)
+-- Drawing a box with code
+local UIBoxHeight = 40
+local UIBoxLineWidth = 4
+gfx.pushContext(UIBoxImage)
+    gfx.setLineWidth(UIBoxLineWidth)
+    -- Horizontal Lines
+    gfx.drawLine(0, UIBoxLineWidth/2, SCREEN_SIZE.dx, UIBoxLineWidth/2)
+    gfx.drawLine(0, UIBoxHeight, SCREEN_SIZE.dx, UIBoxHeight)
+    -- Verticle Lines
+    gfx.drawLine(UIBoxLineWidth/2,0,UIBoxLineWidth/2,UIBoxHeight)
+    gfx.drawLine(SCREEN_SIZE.dx-UIBoxLineWidth/2,0,SCREEN_SIZE.dx-UIBoxLineWidth/2,UIBoxHeight)
+gfx.popContext()
 
 -- Drawing player image
 local playerImage = gfx.image.new(32, 32)
@@ -55,6 +74,8 @@ gfx.pushContext(playerImage)
     gfx.drawRect(10, 20, 2, 6)
 gfx.popContext()
 
+
+
 -- Defining helper function
 local function ring(value, min, max)
 	if (min > max) then
@@ -65,22 +86,26 @@ end
 
 -- Assume image is centered (Anchored 0.5, 0.5)
 local function bounce_off_walls(position, velocity, size, speedModifier)
-    if (position.dx - size.dx/2 < 0) then
+    if (position.dx - size.dx/2 < BallBounds[1].dx) then
         velocity.dx = -velocity.dx * speedModifier
         return true
-    elseif (position.dx + size.dx/2 > SCREEN_SIZE.dx) then
+    elseif (position.dx + size.dx/2 > BallBounds[2].dx) then
         velocity.dx = -velocity.dx * speedModifier
         return true
     end
-    if (position.dy - size.dy/2 < 0) then
+    if (position.dy - size.dy/2 < BallBounds[1].dy) then
         velocity.dy = -velocity.dy * speedModifier
         return true
-    elseif (position.dy + size.dy/2 > SCREEN_SIZE.dy) then
+    elseif (position.dy + size.dy/2 > BallBounds[2].dy) then
         velocity.dy = -velocity.dy * speedModifier
         return true
     end
     return false
 end
+
+-- Inverts game colour
+playdate.display.setInverted(true) 
+
 -- playdate.update function is required in every project!
 function playdate.update()
     -- Clear screen
@@ -105,15 +130,21 @@ function playdate.update()
     ballPosition.dy += ballVel.dy
     if bounce_off_walls(ballPosition, ballVel, ballSize, ballBounceSpeedModifier) then
         ballBounceSoundEffect:play()
+        blocks_destroyed += 1 -- Temporary
     end
 
 
     ----- Draw Stuff -----
+    
     -- Draw text
-    gfx.drawTextAligned("Template configured!", 200, 30, kTextAlignment.center)
+    -- gfx.drawTextAligned("Template configured!", 200, 30, kTextAlignment.center)
     -- Draw player
     playerImage:drawAnchored(playerX, playerY, 0.5, 0.5)
-    -- Draw ball 
+    -- Draw UI
+    UIBoxImage:draw(0,0)
+    playdate.graphics.drawText(string.format("Blocks Destroyed: %d", blocks_destroyed), 10, 10)
+    playdate.graphics.drawText(string.format("Blocks Remaining: %d", blocks_remaining), 200, 10)
+    -- Draw Ball
     ballImage:drawAnchored(ballPosition.dx, ballPosition.dy, 0.5, 0.5)
 
 end
