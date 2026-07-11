@@ -23,7 +23,7 @@ Font = playdate.graphics.font.new("fonts/yoster")
 -- Defining player variables
 local playerSize = 10
 local playerVelocity = 3
-local playerX, playerY = 200, 120
+local playerX, playerY = 24, SCREEN_SIZE.dy / 2
 
 
 -- Define ball variables
@@ -114,16 +114,14 @@ function playdate.update()
     if pd.isCrankDocked() then
         pd.ui.crankIndicator:draw()
     else
-        -- Calculate velocity from crank angle 
-        local crankPosition = pd.getCrankPosition() - 90
-        local xVelocity = math.cos(math.rad(crankPosition)) * playerVelocity
-        local yVelocity = math.sin(math.rad(crankPosition)) * playerVelocity
-        -- Move player
-        playerX += xVelocity
-        playerY += yVelocity
-        -- Loop player position
-        playerX = ring(playerX, -playerSize, SCREEN_SIZE.dx + playerSize)
-        playerY = ring(playerY, -playerSize, SCREEN_SIZE.dy + playerSize)
+        -- Moves the paddle based on crank speed
+        local crankChange = pd.getCrankChange()
+
+        playerY += crankChange * playerVelocity
+
+        -- Clamps to the screen bounds
+        local halfHeight = 16 -- note: player image is currently 32px tall, so it should be updated once the paddle sprite is added. 
+        playerY = math.max(halfHeight, math.min(SCREEN_SIZE.dy - halfHeight, playerY))
     end
     -- Move ball 
     ballPosition.dx += ballVel.dx
