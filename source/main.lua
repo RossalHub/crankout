@@ -27,6 +27,16 @@ BALL_GROUP = 1
 BRICK_GROUP = 2
 PADDLE_GROUP = 4
 
+-- Define Enums
+BrickType = {
+    Basic = 1, -- one hit, nothing special
+    Sturdy = 2, -- 2 hits
+    Tough = 3, -- 3 hits
+    Ball = 4, -- spawns a ball when destroyed, 2 hits
+    Speed = 5, -- gives the ball a large speed increase, 4 hits
+    Slow = 6, -- slows down the ball when hit, 4 hits
+}
+
 
 -- Define ball variables
 BallBounds = {vector2D.new(0,40), SCREEN_SIZE} -- Used as walls for ball
@@ -47,7 +57,7 @@ for x = 1, brickColumns, 1 do
     for y = 1, brickRows, 1 do 
         local brickX = SCREEN_SIZE.dx - brickWidth/2 - brickWidth*brickColumns + x*brickWidth
         local brickY = 40- brickHeight/2 + y*brickHeight
-        table.insert(Bricks, CreateBrick(brickX, brickY))
+        CreateBrick(vector2D.new(brickX, brickY), BrickType.Ball)
     end
 end
 
@@ -77,11 +87,12 @@ end
 -- Inverts game colour
 playdate.display.setInverted(true) 
 
-local balls = {}
+Balls = {}
 
-table.insert(balls, CreateBall(vector2D.new(50, 100), vector2D.new(3, 5)))
-table.insert(balls, CreateBall(vector2D.new(50, 100), vector2D.new(4, 0)))
-table.insert(balls, CreateBall(vector2D.new(50, 100), vector2D.new(5, -5)))
+CreateBall(vector2D.new(50, 100), vector2D.new(3, 5))
+CreateBall(vector2D.new(50, 100), vector2D.new(4, 0))
+CreateBall(vector2D.new(50, 100), vector2D.new(5, -5))
+
 local paddle = CreatePaddle()
 
 -- playdate.update function is required in every project!
@@ -89,8 +100,8 @@ function playdate.update()
     -- Clear screen
     gfx.clear()
 
-    for i = 1, #balls do
-        UpdateBall(balls[i])
+    for i = 1, #Balls do
+        UpdateBall(Balls[i])
     end
     -- Draw crank indicator if crank is docked
     UpdatePaddle(paddle)

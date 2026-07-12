@@ -2,6 +2,9 @@
 local gfx <const> = playdate.graphics
 local image = gfx.image.new("images/ball.png")
 local vector2D <const> = playdate.geometry.vector2D
+local sampleplayer <const> = playdate.sound.sampleplayer
+
+local paddleHitSound = sampleplayer.new("sound/paddle_hit.wav")
 
 local ballSize = 8
 
@@ -9,12 +12,10 @@ local wallSpeedModifier = 0.98
 local brickSpeedModifier = 1
 local ballDamage = 1
 
-local function damageBrickBySprite(sprite)
+local function damageBrickBySprite(sprite, ball)
     for i = 1, #Bricks do
         if Bricks[i].sprite == sprite then
-            if DamageBrick(Bricks[i], ballDamage) then
-                table.remove(Bricks, i)
-            end
+            OnBrickHit(Bricks[i], ball)
             break
         end
     end
@@ -32,7 +33,7 @@ local function bounce_off_obstacles(ball, newPosition)
         local sprite = collisions[i]
 
         if sprite:getTag() == BRICK_GROUP then
-            damageBrickBySprite(sprite)
+            damageBrickBySprite(sprite, ball)
             local brickX, brickY = gfx.sprite.getPosition(collisions[i])
             
             if GetBrickCollisionFace(brickX, brickY, ball.position.dx, ball.position.dy) then
@@ -46,6 +47,7 @@ local function bounce_off_obstacles(ball, newPosition)
             local _, paddleY = sprite:getPosition()
             local offset = (ball.position.dy - paddleY) / 24
             ball.velocity.dy += offset * 2
+            paddleHitSound:play()
             break
         end
     end
@@ -80,10 +82,11 @@ function CreateBall(position, velocity)
     local ball = {
         position = position,
         sprite = sprite,
-        velocity = velocity
+        velocity = velocity,
+        damage = ballDamage
     }
 
-    return ball
+    table.insert(Balls, ball)
 end
 
 function UpdateBall(ball)
@@ -95,4 +98,15 @@ function UpdateBall(ball)
     ball.position.dx += ball.velocity.dx
     ball.position.dy += ball.velocity.dy
     ball.sprite:moveTo(ball.position.dx, ball.position.dy)
+end
+
+function DestroyBall(ball)
+    gfx.sprite.remove(ball.sprite)
+    
+    for i = 1, #Balls do
+        if Balls[i] == ball then
+            table.remove(Balls, i)
+            break
+        end
+    end
 end
