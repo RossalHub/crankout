@@ -21,7 +21,7 @@ function CreatePaddle()
 
     local paddle = {
         sprite = sprite,
-        speedMultiplier = 3
+        speedMultiplier = 1.5
     }
 
     return paddle
