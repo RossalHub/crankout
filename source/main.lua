@@ -12,6 +12,7 @@ import "CoreLibs/sprites"
 
 import "brick.lua"
 import "ball.lua"
+import "paddle.lua"
 -- Localizing commonly used globals
 local pd <const> = playdate
 local gfx <const> = playdate.graphics
@@ -24,11 +25,7 @@ SCREEN_SIZE = vector2D.new(400, 240)
 Font = playdate.graphics.font.new("fonts/yoster")
 BALL_GROUP = 1
 BRICK_GROUP = 2
-
--- Defining player variables
-local playerSize = 10
-local playerVelocity = 3
-local playerX, playerY = 24, SCREEN_SIZE.dy / 2
+PADDLE_GROUP = 4
 
 
 -- Define ball variables
@@ -69,30 +66,6 @@ gfx.pushContext(UIBoxImage)
     gfx.drawLine(SCREEN_SIZE.dx-UIBoxLineWidth/2,0,SCREEN_SIZE.dx-UIBoxLineWidth/2,UIBoxHeight)
 gfx.popContext()
 
--- Drawing player image
-local playerImage = gfx.image.new(32, 32)
-gfx.pushContext(playerImage)
-    -- Draw outline
-    gfx.drawRoundRect(4, 3, 24, 26, 1)
-    -- Draw screen
-    gfx.drawRect(7, 6, 18, 12)
-    -- Draw eyes
-    gfx.drawLine(10, 12, 12, 10)
-    gfx.drawLine(12, 10, 14, 12)
-    gfx.drawLine(17, 12, 19, 10)
-    gfx.drawLine(19, 10, 21, 12)
-    -- Draw crank
-    gfx.drawRect(27, 15, 3, 9)
-    -- Draw A/B buttons
-    gfx.drawCircleInRect(16, 20, 4, 4)
-    gfx.drawCircleInRect(21, 20, 4, 4)
-    -- Draw D-Pad
-    gfx.drawRect(8, 22, 6, 2)
-    gfx.drawRect(10, 20, 2, 6)
-gfx.popContext()
-
-
-
 -- Defining helper function
 local function ring(value, min, max)
 	if (min > max) then
@@ -105,6 +78,7 @@ end
 playdate.display.setInverted(true) 
 
 local ball = CreateBall(vector2D.new(50, 100), vector2D.new(5, 5))
+local paddle = CreatePaddle()
 
 -- playdate.update function is required in every project!
 function playdate.update()
@@ -113,16 +87,7 @@ function playdate.update()
 
     UpdateBall(ball)
     -- Draw crank indicator if crank is docked
-    if not pd.isCrankDocked() then
-        -- Moves the paddle based on crank speed
-        local crankChange = pd.getCrankChange()
-
-        playerY += crankChange * playerVelocity
-
-        -- Clamps to the screen bounds
-        local halfHeight = 16 -- note: player image is currently 32px tall, so it should be updated once the paddle sprite is added. 
-        playerY = math.max(halfHeight, math.min(SCREEN_SIZE.dy - halfHeight, playerY))
-    end
+    UpdatePaddle(paddle)
 
     ----- Draw Stuff -----
     gfx.sprite.update()
@@ -132,7 +97,6 @@ function playdate.update()
     -- Draw text
     -- gfx.drawTextAligned("Template configured!", 200, 30, kTextAlignment.center)
     -- Draw player
-    playerImage:drawAnchored(playerX, playerY, 0.5, 0.5)
     -- Draw UI
     UIBoxImage:draw(0,0)
     playdate.graphics.drawText(string.format("Blocks Destroyed: %d", BricksDestroyed), 10, 10)

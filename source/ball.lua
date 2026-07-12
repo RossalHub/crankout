@@ -29,10 +29,23 @@ local function bounce_off_obstacles(ball, newPosition)
     local hitBrick = false
 
     for i = 1, #collisions do
-        if collisions[i] ~= nil then
-            damageBrickBySprite(collisions[i])
-            hitBrick = true;
+
+        local sprite = collisions[i]
+
+        if sprite:getTag() == BRICK_GROUP then
+            
+            damageBrickBySprite(sprite)
+            hitBrick = true
+
+        elseif sprite:getTag() == PADDLE_GROUP then
+
+            ball.velocity.dx = math.abs(ball.velocity.dx)
+            local _, paddleY = sprite:getPosition()
+            local offset = (ball.position.dy - paddleY) / 24
+            ball.velocity.dy += offset * 2
+
         end
+
     end
 
     -- for now just flip the x velocity
@@ -64,7 +77,7 @@ function CreateBall(position, velocity)
     sprite:setCollideRect(0, 0, 8, 8)
     sprite:moveTo(position.dx, position.dy)
     sprite:setGroups(BALL_GROUP)
-    sprite:setCollidesWithGroups(BRICK_GROUP)
+    sprite:setCollidesWithGroups({BRICK_GROUP, PADDLE_GROUP})
     sprite:add()
 
     local ball = {

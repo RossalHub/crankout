@@ -9,6 +9,7 @@ function CreateBrick(x, y)
     sprite:setCollideRect(0, 0, 12, 25)
     sprite:moveTo(x, y)
     sprite:setGroups(BRICK_GROUP)
+    sprite:setTag(BRICK_GROUP)
     sprite:setCollidesWithGroups(BALL_GROUP)
     sprite:add()
 
