@@ -2,9 +2,11 @@
 local gfx <const> = playdate.graphics
 local image = gfx.image.new("images/ball.png")
 local vector2D <const> = playdate.geometry.vector2D
+
 local ballSize = 8
+
 local wallSpeedModifier = 0.98
-local brickSpeedModifier = 1.1
+local brickSpeedModifier = 1
 local ballDamage = 1
 
 local function damageBrickBySprite(sprite)
@@ -26,31 +28,26 @@ local function bounce_off_obstacles(ball, newPosition)
     local collisions = ball.sprite:overlappingSprites()
     ball.sprite:moveTo(oldPosition.dx, oldPosition.dy)
     
-    local hitBrick = false
-
     for i = 1, #collisions do
-
         local sprite = collisions[i]
 
         if sprite:getTag() == BRICK_GROUP then
-            
             damageBrickBySprite(sprite)
-            hitBrick = true
-
+            local brickX, brickY = gfx.sprite.getPosition(collisions[i])
+            
+            if GetBrickCollisionFace(brickX, brickY, ball.position.dx, ball.position.dy) then
+                ball.velocity.dx = -ball.velocity.dx * brickSpeedModifier
+            else
+                ball.velocity.dy = -ball.velocity.dy * brickSpeedModifier
+            end
+            break
         elseif sprite:getTag() == PADDLE_GROUP then
-
             ball.velocity.dx = math.abs(ball.velocity.dx)
             local _, paddleY = sprite:getPosition()
             local offset = (ball.position.dy - paddleY) / 24
             ball.velocity.dy += offset * 2
-
+            break
         end
-
-    end
-
-    -- for now just flip the x velocity
-    if hitBrick then
-        ball.velocity.dx = -ball.velocity.dx * brickSpeedModifier
     end
 
     -- check if it has collided with the edge of the screen

@@ -77,7 +77,11 @@ end
 -- Inverts game colour
 playdate.display.setInverted(true) 
 
-local ball = CreateBall(vector2D.new(50, 100), vector2D.new(5, 5))
+local balls = {}
+
+table.insert(balls, CreateBall(vector2D.new(50, 100), vector2D.new(3, 5)))
+table.insert(balls, CreateBall(vector2D.new(50, 100), vector2D.new(4, 0)))
+table.insert(balls, CreateBall(vector2D.new(50, 100), vector2D.new(5, -5)))
 local paddle = CreatePaddle()
 
 -- playdate.update function is required in every project!
@@ -85,7 +89,9 @@ function playdate.update()
     -- Clear screen
     gfx.clear()
 
-    UpdateBall(ball)
+    for i = 1, #balls do
+        UpdateBall(balls[i])
+    end
     -- Draw crank indicator if crank is docked
     UpdatePaddle(paddle)
 

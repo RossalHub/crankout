@@ -2,6 +2,22 @@
 -- Localizing commonly used globals
 local gfx <const> = playdate.graphics
 local image = gfx.image.new("images/brick.png")
+local vector2D <const> = playdate.geometry.vector2D
+
+local brickWidth = 12
+local brickHeight = 25
+local brickAngle = 65
+
+function GetBrickCollisionFace(brickX, brickY, ballX, ballY)
+    -- return true if the front or back of the brick was hit
+    local angle = vector2D.new(brickX - ballX, brickY - ballY)
+    local direction = math.abs(math.atan(angle.dy, angle.dx)*(180/math.pi))
+
+    if direction < brickAngle or direction > 180-brickAngle then
+        return true
+    end
+    return false
+end
 
 function CreateBrick(x, y)
     local sprite = gfx.sprite.new(image)
