@@ -7,7 +7,11 @@
 -- Importing libraries used for drawCircleAtPoint and crankIndicator
 import "CoreLibs/graphics"
 import "CoreLibs/ui"
+import "CoreLibs/Object"
+import "CoreLibs/sprites"
 
+import "brick.lua"
+import "ball.lua"
 -- Localizing commonly used globals
 local pd <const> = playdate
 local gfx <const> = playdate.graphics
@@ -18,7 +22,8 @@ local sampleplayer <const> = playdate.sound.sampleplayer
 -- Define constants
 SCREEN_SIZE = vector2D.new(400, 240)
 Font = playdate.graphics.font.new("fonts/yoster")
-
+BALL_GROUP = 1
+BRICK_GROUP = 2
 
 -- Defining player variables
 local playerSize = 10
@@ -27,20 +32,32 @@ local playerX, playerY = 24, SCREEN_SIZE.dy / 2
 
 
 -- Define ball variables
-local ballPosition = vector2D.new(50, 100)
-local ballVel = vector2D.new(5, 5)
-local ballImage = gfx.image.new("images/circle_32x32_black")
-local ballSize = vector2D.new(32,32)
-local ballBounceSpeedModifier = 0.98
-local ballBounceSoundEffect = sampleplayer.new("sound/wall_bounce")
-BallBounds = {vector2D.new(0,42), SCREEN_SIZE} -- Used as walls for ball
+BallBounds = {vector2D.new(0,40), SCREEN_SIZE} -- Used as walls for ball
+
+-- load in Bricks
+local brickWidth = 12
+local brickHeight = 25
+
+local brickRows = 8
+local brickColumns = 4
+
+BricksTotal = brickRows*brickColumns
+BricksDestroyed = 0
+
+Bricks = {}
+
+for x = 1, brickColumns, 1 do
+    for y = 1, brickRows, 1 do 
+        local brickX = SCREEN_SIZE.dx - brickWidth/2 - brickWidth*brickColumns + x*brickWidth
+        local brickY = 40- brickHeight/2 + y*brickHeight
+        table.insert(Bricks, CreateBrick(brickX, brickY))
+    end
+end
 
 -- UI
-local blocks_destroyed = 0
-local blocks_remaining = 0
 local UIBoxImage = gfx.image.new(SCREEN_SIZE.dx, SCREEN_SIZE.dy)
 -- Drawing a box with code
-local UIBoxHeight = 40
+local UIBoxHeight = 38
 local UIBoxLineWidth = 4
 gfx.pushContext(UIBoxImage)
     gfx.setLineWidth(UIBoxLineWidth)
@@ -84,36 +101,19 @@ local function ring(value, min, max)
 	return min + (value - min) % (max - min)
 end
 
--- Assume image is centered (Anchored 0.5, 0.5)
-local function bounce_off_walls(position, velocity, size, speedModifier)
-    if (position.dx - size.dx/2 < BallBounds[1].dx) then
-        velocity.dx = -velocity.dx * speedModifier
-        return true
-    elseif (position.dx + size.dx/2 > BallBounds[2].dx) then
-        velocity.dx = -velocity.dx * speedModifier
-        return true
-    end
-    if (position.dy - size.dy/2 < BallBounds[1].dy) then
-        velocity.dy = -velocity.dy * speedModifier
-        return true
-    elseif (position.dy + size.dy/2 > BallBounds[2].dy) then
-        velocity.dy = -velocity.dy * speedModifier
-        return true
-    end
-    return false
-end
-
 -- Inverts game colour
 playdate.display.setInverted(true) 
+
+local ball = CreateBall(vector2D.new(50, 100), vector2D.new(5, 5))
 
 -- playdate.update function is required in every project!
 function playdate.update()
     -- Clear screen
     gfx.clear()
+
+    UpdateBall(ball)
     -- Draw crank indicator if crank is docked
-    if pd.isCrankDocked() then
-        pd.ui.crankIndicator:draw()
-    else
+    if not pd.isCrankDocked() then
         -- Moves the paddle based on crank speed
         local crankChange = pd.getCrankChange()
 
@@ -123,26 +123,18 @@ function playdate.update()
         local halfHeight = 16 -- note: player image is currently 32px tall, so it should be updated once the paddle sprite is added. 
         playerY = math.max(halfHeight, math.min(SCREEN_SIZE.dy - halfHeight, playerY))
     end
-    -- Move ball 
-    ballPosition.dx += ballVel.dx
-    ballPosition.dy += ballVel.dy
-    if bounce_off_walls(ballPosition, ballVel, ballSize, ballBounceSpeedModifier) then
-        ballBounceSoundEffect:play()
-        blocks_destroyed += 1 -- Temporary
-    end
-
 
     ----- Draw Stuff -----
-    
+    gfx.sprite.update()
+    if pd.isCrankDocked() then
+        pd.ui.crankIndicator:draw()
+    end
     -- Draw text
     -- gfx.drawTextAligned("Template configured!", 200, 30, kTextAlignment.center)
     -- Draw player
     playerImage:drawAnchored(playerX, playerY, 0.5, 0.5)
     -- Draw UI
     UIBoxImage:draw(0,0)
-    playdate.graphics.drawText(string.format("Blocks Destroyed: %d", blocks_destroyed), 10, 10)
-    playdate.graphics.drawText(string.format("Blocks Remaining: %d", blocks_remaining), 200, 10)
-    -- Draw Ball
-    ballImage:drawAnchored(ballPosition.dx, ballPosition.dy, 0.5, 0.5)
-
+    playdate.graphics.drawText(string.format("Blocks Destroyed: %d", BricksDestroyed), 10, 10)
+    playdate.graphics.drawText(string.format("Blocks Remaining: %d", BricksTotal-BricksDestroyed), 200, 10)
 end
