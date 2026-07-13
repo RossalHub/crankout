@@ -53,20 +53,18 @@ local function bounce_off_obstacles(ball, newPosition)
     end
 
     -- check if it has collided with the edge of the screen
-    if (newPosition.dx - ballSize/2 < BallBounds[1].dx) then
-        ball.velocity.dx = -ball.velocity.dx * wallSpeedModifier
-        return true
-    elseif (newPosition.dx + ballSize/2 > BallBounds[2].dx) then
+    if (newPosition.dx + ballSize/2 > BallBounds[2].dx) then
         ball.velocity.dx = -ball.velocity.dx * wallSpeedModifier
         return true
     end
-    if (newPosition.dy - ballSize/2 < BallBounds[1].dy) then
-        ball.velocity.dy = -ball.velocity.dy * wallSpeedModifier
-        return true
-    elseif (newPosition.dy + ballSize/2 > BallBounds[2].dy) then
+
+    if (newPosition.dy - ballSize/2 < BallBounds[1].dy) or
+       (newPosition.dy + ballSize/2 > BallBounds[2].dy) 
+    then
         ball.velocity.dy = -ball.velocity.dy * wallSpeedModifier
         return true
     end
+
     return false
 end
 
@@ -98,6 +96,11 @@ function UpdateBall(ball)
     ball.position.dx += ball.velocity.dx
     ball.position.dy += ball.velocity.dy
     ball.sprite:moveTo(ball.position.dx, ball.position.dy)
+
+    -- ball has gone behind the paddle
+    if ball.position.dx < -30 then
+        DestroyBall(ball)
+    end
 end
 
 function DestroyBall(ball)

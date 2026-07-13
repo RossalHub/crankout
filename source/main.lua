@@ -103,7 +103,9 @@ function playdate.update()
     gfx.clear()
 
     for i = 1, #Balls do
-        UpdateBall(Balls[i])
+        if Balls[i] ~= nil then
+            UpdateBall(Balls[i])
+        end
     end
     -- Draw crank indicator if crank is docked
     UpdatePaddle(paddle)
@@ -119,5 +121,5 @@ function playdate.update()
     -- Draw UI
     UIBoxImage:draw(0,0)
     playdate.graphics.drawText(string.format("Blocks Destroyed: %d", BricksDestroyed), 10, 10)
-    playdate.graphics.drawText(string.format("Blocks Remaining: %d", BricksTotal-BricksDestroyed), 200, 10)
+    playdate.graphics.drawText(string.format("Balls in play: %d", #Balls), 200, 10)
 end
