@@ -92,14 +92,27 @@ local function ring(value, min, max)
 end
 
 Balls = {}
+-- Create balls with no velocity
+function CreateStarterBalls()
+    CreateBall(vector2D.new(50, 100), vector2D.new(0, 0))
+    CreateBall(vector2D.new(50, 100), vector2D.new(0, 0))
+    CreateBall(vector2D.new(50, 100), vector2D.new(0, 0))
+end
+-- Add velocity to balls
+function LaunchBalls()
+    Balls[1].velocity = vector2D.new(3, 5)
+    Balls[2].velocity = vector2D.new(4, 0)
+    Balls[3].velocity = vector2D.new(5, -5)
+end
+-- Start the game 
+function StartGame()
+    LaunchBalls()
+    StartBrickSpawner()
+end
 
-CreateBall(vector2D.new(50, 100), vector2D.new(3, 5))
-CreateBall(vector2D.new(50, 100), vector2D.new(4, 0))
-CreateBall(vector2D.new(50, 100), vector2D.new(5, -5))
-
+local playing_game = false
 local paddle = CreatePaddle()
-
-StartBrickSpawner()
+CreateStarterBalls()
 
 -- playdate.update function is required in every project!
 function playdate.update()
@@ -111,20 +124,21 @@ function playdate.update()
             UpdateBall(Balls[i])
         end
     end
-    -- Draw crank indicator if crank is docked
+    
     UpdatePaddle(paddle)
 
     playdate.timer.updateTimers()
 
     ----- Draw Stuff -----
     gfx.sprite.update()
+    -- Draw crank indicator if crank is docked
     if pd.isCrankDocked() then
         pd.ui.crankIndicator:draw()
+    elseif not playing_game then -- Start Game
+        playing_game = true
+        StartGame()
     end
-    -- Draw text
-    -- gfx.drawTextAligned("Template configured!", 200, 30, kTextAlignment.center)
-    -- Draw player
-    -- Draw UI
+   
     UIBoxImage:draw(0,0)
     gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
     gfx.drawText(string.format("Blocks Destroyed: %d", BricksDestroyed), 10, 10)
