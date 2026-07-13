@@ -1,7 +1,14 @@
 
 -- Localizing commonly used globals
 local gfx <const> = playdate.graphics
-local image = gfx.image.new("images/brick.png")
+local images = {
+    gfx.image.new("images/brick1.png"),
+    gfx.image.new("images/brick2.png"),
+    gfx.image.new("images/brick3.png"),
+    gfx.image.new("images/ball_brick.png"),
+    gfx.image.new("images/speed_brick.png"),
+    gfx.image.new("images/slow_brick.png")
+}
 local vector2D <const> = playdate.geometry.vector2D
 local sampleplayer <const> = playdate.sound.sampleplayer
 
@@ -42,15 +49,13 @@ function CreateBrick(position, type)
     end
 
     -- eventually will use a different image for each type
-    local sprite = gfx.sprite.new(image)
-    sprite = gfx.sprite.new(image)
+    local sprite = gfx.sprite.new(images[type])
     sprite:setCollideRect(0, 0, 12, 25)
     sprite:moveTo(position.dx, position.dy)
     sprite:setGroups(BRICK_GROUP)
     sprite:setTag(BRICK_GROUP)
     sprite:setCollidesWithGroups(BALL_GROUP)
     sprite:add()
-
 
     local brick = {
         maxHealth = health,
@@ -98,7 +103,7 @@ function OnBrickHit(brick, ball)
         destroyBrick(brick)
         return true
     end
-    
+
     hitSound:play()
     -- if not dead, fade out the sprite to indicate it is damaged
     local image = gfx.sprite.getImage(brick.sprite)

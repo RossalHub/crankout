@@ -59,7 +59,7 @@ for x = 1, brickColumns, 1 do
     for y = 1, brickRows, 1 do 
         local brickX = SCREEN_SIZE.dx - brickWidth/2 - brickWidth*brickColumns + x*brickWidth
         local brickY = 40- brickHeight/2 + y*brickHeight
-        CreateBrick(vector2D.new(brickX, brickY), BrickType.Ball)
+        CreateBrick(vector2D.new(brickX, brickY), math.random(6))
     end
 end
 
@@ -85,9 +85,6 @@ local function ring(value, min, max)
 	end
 	return min + (value - min) % (max - min)
 end
-
--- Inverts game colour
-playdate.display.setInverted(true) 
 
 Balls = {}
 
