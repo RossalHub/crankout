@@ -9,10 +9,12 @@ import "CoreLibs/graphics"
 import "CoreLibs/ui"
 import "CoreLibs/Object"
 import "CoreLibs/sprites"
+import "CoreLibs/animation"
 
 import "brick.lua"
 import "ball.lua"
 import "paddle.lua"
+import "brick_effect.lua"
 -- Localizing commonly used globals
 local pd <const> = playdate
 local gfx <const> = playdate.graphics

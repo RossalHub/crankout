@@ -66,6 +66,7 @@ end
 local function destroyBrick(brick)
     gfx.sprite.remove(brick.sprite)
     BricksDestroyed += 1
+    CreateBrickEffect(brick.position.dx,brick.position.dy)
 
     if brick.type == BrickType.Ball then
         -- should randomize the direction eventually
