@@ -111,3 +111,67 @@ function OnBrickHit(brick, ball)
     brick.sprite:setImage(fadedImage)
     return false
 end
+
+local function GetRandomBrickType()
+    -- 20% chance to create gap
+    if math.random() < 0.20 then 
+        return nil 
+    end
+
+    -- randomize types
+    local roll = math.random(1, 100)
+    if roll <= 50 then return BrickType.Basic
+    elseif roll <= 70 then return BrickType.Sturdy
+    elseif roll <= 80 then return BrickType.Tough
+    elseif roll <= 87 then return BrickType.Ball
+    elseif roll <= 94 then return BrickType.Speed
+    else return BrickType.Slow end
+end
+
+-- shifts all existing rows by 1
+function ShiftBricksLeft()
+    -- iterate backwards when removing items from a table to avoid skipping indices
+    for i = #Bricks, 1, -1 do
+        local brick = Bricks[i]
+        brick.position.dx -= brickWidth
+        brick.sprite:moveTo(brick.position.dx, brick.position.dy)
+
+        -- edge case if brick goes off the left side of the screen
+        if brick.position.dx < -(brickWidth / 2) then
+            gfx.sprite.remove(brick.sprite)
+            table.remove(Bricks, i)
+        end
+    end
+end
+
+-- spawns new column of bricks on the right side
+function SpawnNewBrickColumn()
+    ShiftBricksLeft()
+
+    -- spawn at right edge of the screen
+    local spawnX = SCREEN_SIZE.dx - brickWidth/2
+    
+    -- loop through the 8 rows
+    for y = 1, BrickRows, 1 do
+        local brickY = 40 - brickHeight/2 + y*brickHeight
+        local randomType = GetRandomBrickType()
+        
+        -- spawn a brick if randomType isn't nil
+        if randomType ~= nil then
+            CreateBrick(vector2D.new(spawnX, brickY), randomType)
+        end
+    end
+end
+
+-- sets up brick timer
+local brickSpawnTimer = nil
+
+function StartBrickSpawner()
+    if brickSpawnTimer then 
+        brickSpawnTimer:remove() 
+    end
+    
+    -- 20,000 milliseconds = 20 seconds
+    brickSpawnTimer = playdate.timer.new(20000, SpawnNewBrickColumn)
+    brickSpawnTimer.repeats = true
+end

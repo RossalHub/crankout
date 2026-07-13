@@ -10,6 +10,7 @@ import "CoreLibs/ui"
 import "CoreLibs/Object"
 import "CoreLibs/sprites"
 import "CoreLibs/animation"
+import "CoreLibs/timer"
 
 import "brick.lua"
 import "ball.lua"
@@ -47,17 +48,17 @@ BallBounds = {vector2D.new(0,40), SCREEN_SIZE} -- Used as walls for ball
 local brickWidth = 12
 local brickHeight = 25
 
-local brickRows = 8
-local brickColumns = 4
+BrickRows = 8
+BrickColumns = 4
 
-BricksTotal = brickRows*brickColumns
+BricksTotal = BrickRows*BrickColumns
 BricksDestroyed = 0
 
 Bricks = {}
 
-for x = 1, brickColumns, 1 do
-    for y = 1, brickRows, 1 do 
-        local brickX = SCREEN_SIZE.dx - brickWidth/2 - brickWidth*brickColumns + x*brickWidth
+for x = 1, BrickColumns, 1 do
+    for y = 1, BrickRows, 1 do 
+        local brickX = SCREEN_SIZE.dx - brickWidth/2 - brickWidth*BrickColumns + x*brickWidth
         local brickY = 40- brickHeight/2 + y*brickHeight
         CreateBrick(vector2D.new(brickX, brickY), math.random(6))
     end
@@ -98,6 +99,8 @@ CreateBall(vector2D.new(50, 100), vector2D.new(5, -5))
 
 local paddle = CreatePaddle()
 
+StartBrickSpawner()
+
 -- playdate.update function is required in every project!
 function playdate.update()
     -- Clear screen
@@ -110,6 +113,8 @@ function playdate.update()
     end
     -- Draw crank indicator if crank is docked
     UpdatePaddle(paddle)
+
+    playdate.timer.updateTimers()
 
     ----- Draw Stuff -----
     gfx.sprite.update()
