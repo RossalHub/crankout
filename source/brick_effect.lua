@@ -4,7 +4,7 @@ local gfx <const> = playdate.graphics
 
 local frameTime = 50
 local totalFrames = 10
-local animationImagetable = gfx.imagetable.new("images/brick_explosion-table-48-50.png")
+local animationImagetable = gfx.imagetable.new("images/brick_explosion_white-table-48-50.png")
 
 -- return a value between 0 and 1 representing fade amount
 local function get_animation_fade_amount(frame)

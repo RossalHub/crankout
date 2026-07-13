@@ -68,6 +68,10 @@ local UIBoxImage = gfx.image.new(SCREEN_SIZE.dx, SCREEN_SIZE.dy)
 -- Drawing a box with code
 local UIBoxHeight = 38
 local UIBoxLineWidth = 4
+
+gfx.setBackgroundColor(gfx.kColorBlack)
+gfx.setColor(gfx.kColorWhite)
+
 gfx.pushContext(UIBoxImage)
     gfx.setLineWidth(UIBoxLineWidth)
     -- Horizontal Lines
@@ -117,6 +121,8 @@ function playdate.update()
     -- Draw player
     -- Draw UI
     UIBoxImage:draw(0,0)
-    playdate.graphics.drawText(string.format("Blocks Destroyed: %d", BricksDestroyed), 10, 10)
-    playdate.graphics.drawText(string.format("Balls in play: %d", #Balls), 200, 10)
+    gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+    gfx.drawText(string.format("Blocks Destroyed: %d", BricksDestroyed), 10, 10)
+    gfx.drawText(string.format("Balls in play: %d", #Balls), 200, 10)
+    gfx.setImageDrawMode(gfx.kDrawModeCopy)
 end
