@@ -278,7 +278,7 @@ function playdate.update()
         
         -- lerp offset to 0
         local currentUiY = lerp(-42, 0, introProgress)
-        local currentPaddleX = lerp(-30, 20, introProgress) 
+        local currentPaddleX = lerp(-30, 30, introProgress) 
         local currentBrickXShift = lerp(100, 0, introProgress)
         
         -- apply animation to the paddle
