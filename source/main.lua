@@ -113,7 +113,8 @@ BgOffset = 0
 local bgSpriteTable = gfx.imagetable.new("images/stars-table-400-200.png")
 local bgAnimationLoop = gfx.animation.loop.new(250, bgSpriteTable, true)
 local function drawBg(x, y, width, height)
-    gfx.image.drawTiled(bgAnimationLoop:image(), -BgOffset, 40, 400, 200)
+    bgAnimationLoop:draw(-BgOffset%400, 40)
+    bgAnimationLoop:draw(-BgOffset%400-400, 40)
     BgOffset += 1
 end
 
