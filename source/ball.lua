@@ -46,7 +46,8 @@ local function bounce_off_obstacles(ball, newPosition)
             ball.velocity.dx = math.abs(ball.velocity.dx)
             local _, paddleY = sprite:getPosition()
             local offset = (ball.position.dy - paddleY) / 24
-            ball.velocity.dy += offset * 2
+            ball.velocity.dy += offset * 2 
+            ball.velocity.dy += playdate.getCrankChange()/5
             paddleHitSound:play()
             break
         end
