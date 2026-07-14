@@ -123,8 +123,8 @@ gfx.sprite.setBackgroundDrawingCallback(drawBg)
 -- UI
 local UIBoxImage = gfx.image.new(SCREEN_SIZE.dx, SCREEN_SIZE.dy)
 -- Drawing a box with code
-local UIBoxHeight = 38
-local UIBoxLineWidth = 4
+local UIBoxHeight = 39 -- Was 38
+local UIBoxLineWidth = 2 --Was 4
 
 gfx.setBackgroundColor(gfx.kColorBlack)
 gfx.setColor(gfx.kColorWhite)
