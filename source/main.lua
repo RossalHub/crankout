@@ -26,7 +26,7 @@ local sampleplayer <const> = playdate.sound.sampleplayer
 
 -- Define constants
 SCREEN_SIZE = vector2D.new(400, 240)
-Font = playdate.graphics.font.new("fonts/yoster")
+Font = gfx.font.new("fonts/yoster")
 BALL_GROUP = 1
 BRICK_GROUP = 2
 PADDLE_GROUP = 4
@@ -57,7 +57,46 @@ BricksDestroyed = 0
 
 Bricks = {}
 
--- Helper to generate bricks with offset for animation
+-- leaderboard setup
+-- load saved scores or create a default table of 5 zeros
+Leaderboard = playdate.datastore.read("leaderboard") or {0, 0, 0, 0, 0}
+local latestScoreRank = nil
+
+-- checks final score against the leaderboard and saves if it's in the top 5
+local function UpdateLeaderboard(finalScore)
+    latestScoreRank = nil
+    if finalScore == 0 then return end
+    
+    for i = 1, 5 do
+        if finalScore > Leaderboard[i] then
+            table.insert(Leaderboard, i, finalScore)
+            table.remove(Leaderboard, 6) -- keep table at 5 entries
+            latestScoreRank = i
+            playdate.datastore.write(Leaderboard, "leaderboard")
+            break
+        end
+    end
+end
+
+-- helper to draw the leaderboard cleanly in multiple places
+local function DrawLeaderboard(y, showNewFlag)
+    gfx.drawTextAligned("*HIGH SCORES*", 200, y, kTextAlignment.center)
+    local startY = y + 25
+    
+    for i = 1, 5 do
+        local rowY = startY + ((i - 1) * 20)
+        -- rank on the left
+        gfx.drawTextAligned(tostring(i) .. ".", 150, rowY, kTextAlignment.left)
+        -- score on the right
+        gfx.drawTextAligned(tostring(Leaderboard[i]), 230, rowY, kTextAlignment.right)
+        
+        -- NEW! flag if applicable
+        if showNewFlag and latestScoreRank == i then
+            gfx.drawTextAligned("NEW!", 245, rowY, kTextAlignment.left)
+        end
+    end
+end
+
 function GenerateBricks(xOffset)
     xOffset = xOffset or 0
     for x = 1, BrickColumns, 1 do
@@ -195,8 +234,10 @@ function ResetGame()
     
     -- reset stats and timers
     BricksDestroyed = 0
-    if BrickSpawnTimer then
-        BrickSpawnTimer:remove()
+    latestScoreRank = nil -- clear NEW! flag for the next round
+    
+    if BrickSpawnTimer then 
+        BrickSpawnTimer:remove() 
         BrickSpawnTimer = nil
     end
     
@@ -217,7 +258,10 @@ function playdate.update()
     if title_screen then
         gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
         -- title text
-        gfx.drawTextAligned("*CRANKOUT*", 200, 90, kTextAlignment.center)
+        gfx.drawTextAligned("*CRANKOUT*", 200, 30, kTextAlignment.center)
+        
+        -- draw leaderboard
+        DrawLeaderboard(75, false)
         gfx.setImageDrawMode(gfx.kDrawModeCopy)
         
         if pd.isCrankDocked() then
@@ -269,16 +313,20 @@ function playdate.update()
         gfx.drawText(string.format("Blocks Destroyed: %d", BricksDestroyed), 10, 10)
         gfx.drawText(string.format("Balls in play: %d", #Balls), 200, 10)
         
-        -- dark overlay box behind the gameover text
+        -- dark overlay box behind the gameover and leaderboard text
         gfx.setColor(gfx.kColorBlack)
-        gfx.fillRect(90, 85, 220, 70)
+        gfx.fillRect(80, 20, 240, 200)
         gfx.setColor(gfx.kColorWhite)
         gfx.setLineWidth(2)
-        gfx.drawRect(90, 85, 220, 70)
+        gfx.drawRect(80, 20, 240, 200)
         
         -- game over text
-        gfx.drawText("*GAME OVER*", 150, 100)
-        gfx.drawText("Press A to Try Again!", 115, 125)
+        gfx.drawTextAligned("*GAME OVER*", 200, 30, kTextAlignment.center)
+        
+        -- draw leaderboard with new! flag enabled
+        DrawLeaderboard(65, true)
+        
+        gfx.drawTextAligned("Press A to Try Again!", 200, 195, kTextAlignment.center)
         gfx.setImageDrawMode(gfx.kDrawModeCopy)
         
         -- A button to reset the game
@@ -304,6 +352,8 @@ function playdate.update()
     -- check for game over after updating physics
     if playing_game and CheckGameOver() then
         game_over = true
+        -- trigger leaderboard check right when the game ends
+        UpdateLeaderboard(BricksDestroyed)
     end
 
     ----- Draw Stuff -----
