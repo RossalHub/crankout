@@ -41,6 +41,8 @@ BrickType = {
     Slow = 6, -- slows down the ball when hit, 1 hit
 }
 
+local logoImage = gfx.image.new("images/logo.png")
+
 
 -- Define ball variables
 BallBounds = {vector2D.new(0,40), SCREEN_SIZE} -- Used as walls for ball
@@ -260,12 +262,18 @@ function playdate.update()
 
     -- title screen state
     if title_screen then
-        gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
-        -- title text
-        gfx.drawTextAligned("*CRANKOUT*", 200, 30, kTextAlignment.center)
+        if logoImage then
+            local w, h = logoImage:getSize()
+            logoImage:draw(200 - w/2, 10) 
+        else
+            gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+            gfx.drawTextAligned("*CRANKOUT*", 200, 30, kTextAlignment.center)
+            gfx.setImageDrawMode(gfx.kDrawModeCopy)
+        end
         
-        -- draw leaderboard
-        DrawLeaderboard(75, false)
+        gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+        DrawLeaderboard(85, false) 
+        
         gfx.setImageDrawMode(gfx.kDrawModeCopy)
         
         if pd.isCrankDocked() then
