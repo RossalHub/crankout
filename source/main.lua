@@ -16,6 +16,7 @@ import "brick.lua"
 import "ball.lua"
 import "paddle.lua"
 import "brick_effect.lua"
+
 -- Localizing commonly used globals
 local pd <const> = playdate
 local gfx <const> = playdate.graphics
@@ -56,19 +57,17 @@ BricksDestroyed = 0
 
 Bricks = {}
 
--- helper to generate the initial wall of bricks
-function GenerateBricks()
+-- Helper to generate bricks with offset for animation
+function GenerateBricks(xOffset)
+    xOffset = xOffset or 0
     for x = 1, BrickColumns, 1 do
         for y = 1, BrickRows, 1 do 
-            local brickX = SCREEN_SIZE.dx - brickWidth/2 - brickWidth*BrickColumns + x*brickWidth
-            local brickY = 40- brickHeight/2 + y*brickHeight
+            local brickX = SCREEN_SIZE.dx - brickWidth/2 - brickWidth*BrickColumns + x*brickWidth + xOffset
+            local brickY = 40 - brickHeight/2 + y*brickHeight
             CreateBrick(vector2D.new(brickX, brickY), math.random(6))
         end
     end
 end
-
--- generate first set of bricks
-GenerateBricks()
 
 -- UI
 local UIBoxImage = gfx.image.new(SCREEN_SIZE.dx, SCREEN_SIZE.dy)
@@ -104,25 +103,68 @@ function CreateStarterBalls()
     CreateBall(vector2D.new(50, 100), vector2D.new(0, 0))
     CreateBall(vector2D.new(50, 100), vector2D.new(0, 0))
 end
--- Add velocity to balls
+
 function LaunchBalls()
-    Balls[1].velocity = vector2D.new(3, 5)
-    Balls[2].velocity = vector2D.new(4, 0)
-    Balls[3].velocity = vector2D.new(5, -5)
+    if Balls[1] then Balls[1].velocity = vector2D.new(3, 5) end
+    if Balls[2] then Balls[2].velocity = vector2D.new(4, 0) end
+    if Balls[3] then Balls[3].velocity = vector2D.new(5, -5) end
 end
--- Start the game 
+
+-- game states
+local title_screen = true
+local intro_animating = false
+local playing_game = false
+local game_over = false
+
+local paddle = nil
+local introTimer = nil
+
+-- animation position offsets
+local uiYOffset = -42      
+local paddleXOffset = -50  
+local brickXOffset = 100   
+
+-- track animation
+local introProgress = 0
+
+-- lerp animation
+local function lerp(start, finish, t)
+    return start + (finish - start) * t
+end
+
+function StartIntroAnimation()
+    title_screen = false
+    intro_animating = true
+    introProgress = 0
+    
+    -- instantiate objects slightly off-screen
+    paddle = CreatePaddle()
+    paddle.sprite:moveTo(-30, 120) 
+    
+    GenerateBricks(brickXOffset)   
+    
+    -- create timer
+    introTimer = playdate.timer.new(500, 0, 1)
+    introTimer.easingFunction = playdate.easingFunctions.outCubic
+    
+    introTimer.updateCallback = function(timer)
+        introProgress = timer.value
+    end
+    
+    -- trigger StartGame automatically when timer finishes
+    introTimer.timerEndedCallback = function()
+        StartGame()
+    end
+end
+
 function StartGame()
+    intro_animating = false
+    playing_game = true
+    CreateStarterBalls()
     LaunchBalls()
     StartBrickSpawner()
 end
 
--- game states
-local playing_game = false
-local game_over = false
-local paddle = CreatePaddle()
-CreateStarterBalls()
-
--- checks if the player ran out of balls, or if all balls have stalled
 function CheckGameOver()
     -- end if no balls are left
     if #Balls == 0 then return true end
@@ -142,15 +184,13 @@ end
 
 -- clears board and restarts
 function ResetGame()
-    -- clear existing balls
-    for i = #Balls, 1, -1 do
-        DestroyBall(Balls[i])
-    end
-    
-    -- clear existing bricks
+    for i = #Balls, 1, -1 do DestroyBall(Balls[i]) end
     for i = #Bricks, 1, -1 do
         gfx.sprite.remove(Bricks[i].sprite)
         table.remove(Bricks, i)
+    end
+    if paddle and paddle.sprite then
+        gfx.sprite.remove(paddle.sprite)
     end
     
     -- reset stats and timers
@@ -160,12 +200,11 @@ function ResetGame()
         BrickSpawnTimer = nil
     end
     
-    -- repopulate the board
-    GenerateBricks()
-    CreateStarterBalls()
-    
-    -- reset states
-    playing_game = false
+    -- restart animation on retry
+    uiYOffset = -42
+    paddleXOffset = -50
+    brickXOffset = 100
+    StartIntroAnimation()
     game_over = false
 end
 
@@ -174,6 +213,54 @@ function playdate.update()
     -- Clear screen
     gfx.clear()
 
+    -- title screen state
+    if title_screen then
+        gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+        -- title text
+        gfx.drawTextAligned("*CRANKOUT*", 200, 90, kTextAlignment.center)
+        gfx.setImageDrawMode(gfx.kDrawModeCopy)
+        
+        if pd.isCrankDocked() then
+            pd.ui.crankIndicator:draw()
+        else
+            StartIntroAnimation()
+        end
+        return
+    end
+
+    -- intro animating state
+    if intro_animating then
+        playdate.timer.updateTimers()
+        
+        -- lerp offset to 0
+        local currentUiY = lerp(-42, 0, introProgress)
+        local currentPaddleX = lerp(-30, 20, introProgress) 
+        local currentBrickXShift = lerp(100, 0, introProgress)
+        
+        -- apply animation to the paddle
+        if paddle and paddle.sprite then
+            local _, py = paddle.sprite:getPosition()
+            paddle.sprite:moveTo(currentPaddleX, py)
+        end
+        
+        -- apply animation to the bricks
+        for i = 1, #Bricks do
+            -- determine the correct column based on how GenerateBricks populates the table
+            local col = math.floor((i - 1) / BrickRows) + 1
+            local nativeX = SCREEN_SIZE.dx - brickWidth/2 - brickWidth*BrickColumns + col*brickWidth
+            
+            Bricks[i].position.dx = nativeX + currentBrickXShift
+            Bricks[i].sprite:moveTo(Bricks[i].position.dx, Bricks[i].position.dy)
+        end
+        
+        -- draw sliding structures
+        gfx.sprite.update()
+        UIBoxImage:draw(0, currentUiY)
+        
+        return
+    end
+
+    -- game over state
     if game_over then
         -- keep drawing frozen game behind the UI
         gfx.sprite.update()
@@ -203,6 +290,7 @@ function playdate.update()
         return
     end
 
+    -- gameplay state
     for i = 1, #Balls do
         if Balls[i] ~= nil then
             UpdateBall(Balls[i])
@@ -220,13 +308,6 @@ function playdate.update()
 
     ----- Draw Stuff -----
     gfx.sprite.update()
-    -- Draw crank indicator if crank is docked
-    if pd.isCrankDocked() then
-        pd.ui.crankIndicator:draw()
-    elseif not playing_game then -- Start Game
-        playing_game = true
-        StartGame()
-    end
    
     UIBoxImage:draw(0,0)
     gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
