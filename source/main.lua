@@ -36,9 +36,9 @@ BrickType = {
     Basic = 1, -- one hit, nothing special
     Sturdy = 2, -- 2 hits
     Tough = 3, -- 3 hits
-    Ball = 4, -- spawns a ball when destroyed, 2 hits
-    Speed = 5, -- gives the ball a large speed increase, 4 hits
-    Slow = 6, -- slows down the ball when hit, 4 hits
+    Ball = 4, -- spawns a ball when destroyed, 1 hit
+    Speed = 5, -- gives the ball a large speed increase, 1 hit
+    Slow = 6, -- slows down the ball when hit, 1 hit
 }
 
 

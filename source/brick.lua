@@ -37,13 +37,13 @@ function CreateBrick(position, type)
     elseif type == BrickType.Sturdy then
         health = 2
     elseif type == BrickType.Ball then
-        health = 2
+        health = 1
     elseif type == BrickType.Tough then
         health = 3
     elseif type == BrickType.Speed then
-        health = 4
+        health = 1
     elseif type == BrickType.Slow then
-        health = 4
+        health = 1
     else
         health = 1
     end
@@ -172,6 +172,6 @@ function StartBrickSpawner()
     end
     
     -- 20,000 milliseconds = 20 seconds
-    brickSpawnTimer = playdate.timer.new(20000, SpawnNewBrickColumn)
+    brickSpawnTimer = playdate.timer.new(5000, SpawnNewBrickColumn)
     brickSpawnTimer.repeats = true
 end
