@@ -33,16 +33,18 @@ function UpdatePaddle(paddle)
         return
     end
 
-    local crankChange = pd.getCrankChange()
-
-    local x, y = paddle.sprite:getPosition()
-
-    y += crankChange * paddle.speedMultiplier
-
     local halfHeight = paddleHeight / 2
-    
-    local topBoundary = 40 + halfHeight 
+    local topBoundary = 40 + halfHeight
     local bottomBoundary = SCREEN_SIZE.dy - halfHeight
+    local crankChange = pd.getCrankChange()
+    local crankPosition = pd.getCrankPosition()
+    local x, y = paddle.sprite:getPosition()
+    if crankPosition <= 180 then
+        y = topBoundary + crankPosition * 220/bottomBoundary
+    else
+        
+        y = bottomBoundary - crankPosition % 180 * 220/bottomBoundary
+    end
 
     -- clamp y position
     y = math.max(
