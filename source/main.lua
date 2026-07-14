@@ -108,6 +108,17 @@ function GenerateBricks(xOffset)
     end
 end
 
+-- background
+BgOffset = 0
+local bgSpriteTable = gfx.imagetable.new("images/stars-table-400-200.png")
+local bgAnimationLoop = gfx.animation.loop.new(250, bgSpriteTable, true)
+local function drawBg(x, y, width, height)
+    gfx.image.drawTiled(bgAnimationLoop:image(), -BgOffset, 40, 400, 200)
+    BgOffset += 1
+end
+
+gfx.sprite.setBackgroundDrawingCallback(drawBg)
+
 -- UI
 local UIBoxImage = gfx.image.new(SCREEN_SIZE.dx, SCREEN_SIZE.dy)
 -- Drawing a box with code
@@ -126,14 +137,6 @@ gfx.pushContext(UIBoxImage)
     gfx.drawLine(UIBoxLineWidth/2,0,UIBoxLineWidth/2,UIBoxHeight)
     gfx.drawLine(SCREEN_SIZE.dx-UIBoxLineWidth/2,0,SCREEN_SIZE.dx-UIBoxLineWidth/2,UIBoxHeight)
 gfx.popContext()
-
--- Defining helper function
-local function ring(value, min, max)
-	if (min > max) then
-		min, max = max, min
-	end
-	return min + (value - min) % (max - min)
-end
 
 Balls = {}
 -- Create balls with no velocity
@@ -358,7 +361,6 @@ function playdate.update()
 
     ----- Draw Stuff -----
     gfx.sprite.update()
-   
     UIBoxImage:draw(0,0)
     gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
     gfx.drawText(string.format("Blocks Destroyed: %d", BricksDestroyed), 10, 10)
