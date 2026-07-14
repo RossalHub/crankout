@@ -39,10 +39,9 @@ function UpdatePaddle(paddle)
     local crankChange = pd.getCrankChange()
     local crankPosition = pd.getCrankPosition()
     local x, y = paddle.sprite:getPosition()
-    if crankPosition <= 180 then
+    if IsCrankBehind() then
         y = topBoundary + crankPosition * 220/bottomBoundary
     else
-        
         y = bottomBoundary - crankPosition % 180 * 220/bottomBoundary
     end
 
@@ -55,3 +54,11 @@ function UpdatePaddle(paddle)
     paddle.sprite:moveTo(x, y)
 
 end
+
+function IsCrankBehind()
+    local crankPosition = playdate.getCrankPosition()
+    if crankPosition <= 180 then
+        return true
+    end
+    return false
+    end
