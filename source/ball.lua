@@ -45,12 +45,13 @@ local function bounce_off_obstacles(ball, newPosition)
         elseif sprite:getTag() == PADDLE_GROUP then
             ball.velocity.dx = math.abs(ball.velocity.dx)
             local _, paddleY = sprite:getPosition()
+            ball.position.dx = 50
             local offset = (ball.position.dy - paddleY) / 24
             ball.velocity.dy += offset * 2
             local crankChange = playdate.getCrankChange()
-            if IsCrankBehind() and crankChange > 5 then
+            if IsCrankBehind() and crankChange > 2.5 then
                 ball.velocity.dy = crankChange/10
-            elseif not IsCrankBehind() and crankChange > 5 then
+            elseif not IsCrankBehind() and crankChange > 2.5 then
                 ball.velocity.dy = -crankChange/10
             end
             paddleHitSound:play()
