@@ -43,7 +43,9 @@ BrickType = {
 }
 
 local logoImage = gfx.image.new("images/logo.png")
+local hardImage = gfx.image.new("images/hardexclamation.png")
 HardMusic = playdate.sound.fileplayer.new("sound/hardmode_music.mp3")
+DemonCanSpawn = false
 
 
 -- Define ball variables
@@ -277,12 +279,15 @@ end
 function playdate.update()
     -- Clear screen
     gfx.clear()
+    
 
     -- title screen state
     if title_screen then
         -- updates the background so that the stars are also in the title screen
         gfx.sprite.update()
-
+        if DemonCanSpawn then
+            hardImage:draw(10,10)
+        end
         if logoImage then
             local w, h = logoImage:getSize()
             logoImage:draw(200 - w/2, 10) 
@@ -301,14 +306,21 @@ function playdate.update()
             pd.ui.crankIndicator:draw()
         else
             gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
-            gfx.drawTextAligned("*[A] TO START*", 325, 200, kTextAlignment.center)
+            gfx.drawTextAligned("*[A] TO START*", 325, 190, kTextAlignment.center)
+            gfx.drawTextAligned("*[B] FOR A TWIST*", 325, 210, kTextAlignment.center)
             gfx.setImageDrawMode(gfx.kDrawModeCopy)
         end
+        
+        if playdate.buttonJustPressed(playdate.kButtonB) then
+            DemonCanSpawn = not DemonCanSpawn
+        end
+        
         if not pd.isCrankDocked() and playdate.buttonIsPressed(playdate.kButtonA) then
             StartIntroAnimation()
         end
         return
     end
+
 
     -- intro animating state
     if intro_animating then
@@ -338,6 +350,7 @@ function playdate.update()
         -- draw sliding structures
         gfx.sprite.update()
         UIBoxImage:draw(0, currentUiY)
+
         
         return
     end
@@ -346,6 +359,7 @@ function playdate.update()
     if game_over then
         -- keep drawing frozen game behind the UI
         HardMusic:stop()
+        DemonCanSpawn = false
         gfx.sprite.update()
         UIBoxImage:draw(0,0)
         gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
