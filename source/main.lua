@@ -307,11 +307,11 @@ function playdate.update()
         else
             gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
             gfx.drawTextAligned("*[A] TO START*", 325, 190, kTextAlignment.center)
-            gfx.drawTextAligned("*[B] FOR A TWIST*", 325, 210, kTextAlignment.center)
+            gfx.drawTextAligned("*[<] FOR A TWIST*", 325, 210, kTextAlignment.center)
             gfx.setImageDrawMode(gfx.kDrawModeCopy)
         end
         
-        if playdate.buttonJustPressed(playdate.kButtonB) then
+        if playdate.buttonJustPressed(playdate.kButtonLeft) then
             DemonCanSpawn = not DemonCanSpawn
         end
         
