@@ -43,6 +43,7 @@ local function bounce_off_obstacles(ball, newPosition)
             end
             break
         elseif sprite:getTag() == PADDLE_GROUP then
+            ball.velocity = ball.velocity * 1.05
             ball.velocity.dx = math.abs(ball.velocity.dx)
             local _, paddleY = sprite:getPosition()
             ball.position.dx = 50
