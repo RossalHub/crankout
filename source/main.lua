@@ -170,6 +170,10 @@ local intro_animating = false
 local playing_game = false
 local game_over = false
 
+local showing_help = false   -- tracks if the help menu is currently open
+local helpProgress = 0       -- tracks the animation of the menu sliding
+local helpTimer = nil
+
 local paddle = nil
 local introTimer = nil
 
@@ -188,6 +192,28 @@ end
 
 function clamp(value, min, max)
     return math.max(math.min(value, max), min)
+end
+
+-- toggles help menu and creates sliding animation
+function ToggleHelp()
+    -- clear any existing animation timer
+    if helpTimer then helpTimer:remove() end
+    
+    local startVal = helpProgress
+    local endVal = showing_help and 0 or 1
+    showing_help = not showing_help
+    
+    helpTimer = playdate.timer.new(300, startVal, endVal)
+    helpTimer.easingFunction = playdate.easingFunctions.outCubic
+    
+    helpTimer.updateCallback = function(timer)
+        helpProgress = timer.value
+    end
+    
+    -- snap the value to 0 or 1
+    helpTimer.timerEndedCallback = function()
+        helpProgress = endVal
+    end
 end
 
 function StartIntroAnimation()
@@ -286,6 +312,7 @@ function playdate.update()
 
     -- title screen state
     if title_screen then
+        playdate.timer.updateTimers()
         -- updates the background so that the stars are also in the title screen
         gfx.sprite.update()
         if DemonCanSpawn then
@@ -309,6 +336,8 @@ function playdate.update()
             pd.ui.crankIndicator:draw()
         else
             gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+            -- draw inputs
+            gfx.drawTextAligned("*[B] HOW TO PLAY*", 75, 200, kTextAlignment.center)
             gfx.drawTextAligned("*[A] TO START*", 325, 190, kTextAlignment.center)
             gfx.drawTextAligned("*[<] FOR A TWIST*", 325, 210, kTextAlignment.center)
             gfx.setImageDrawMode(gfx.kDrawModeCopy)
@@ -318,9 +347,41 @@ function playdate.update()
             DemonCanSpawn = not DemonCanSpawn
         end
         
-        if not pd.isCrankDocked() and playdate.buttonIsPressed(playdate.kButtonA) then
+        
+        -- start game if the crank is out, A is pressed, and help menu is closed
+        if not pd.isCrankDocked() and not showing_help and helpProgress == 0 and playdate.buttonIsPressed(playdate.kButtonA) then
             StartIntroAnimation()
         end
+        
+        -- toggle help menu when B is pressed
+        if playdate.buttonJustPressed(playdate.kButtonB) then
+            ToggleHelp()
+        end
+        
+        -- draw help menu if it's visible at all
+        if helpProgress > 0 then
+            -- lerp Y position
+            local helpY = lerp(-240, 20, helpProgress)
+            
+            -- draw background box
+            gfx.setColor(gfx.kColorBlack)
+            gfx.fillRect(20, helpY, 360, 200)
+            gfx.setColor(gfx.kColorWhite)
+            gfx.setLineWidth(2)
+            gfx.drawRect(20, helpY, 360, 200)
+            
+            -- draw text inside box
+            gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+            gfx.drawTextAligned("*HOW TO PLAY*", 200, helpY + 15, kTextAlignment.center)
+            
+            local helpText = "Bounce balls off of your ship with the crank to break bricks! Different brick types do different things: speeding and slowing the ball, adding a new ball, and taking multiple hits to break. If you lose all of your balls or the bricks reach your ship, the game ends."
+            
+            gfx.drawTextInRect(helpText, 30, helpY + 45, 340, 130)
+            
+            gfx.drawTextAligned("Press B to Close", 200, helpY + 175, kTextAlignment.center)
+            gfx.setImageDrawMode(gfx.kDrawModeCopy)
+        end
+        
         return
     end
 
