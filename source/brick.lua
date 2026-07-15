@@ -15,6 +15,9 @@ local sampleplayer <const> = playdate.sound.sampleplayer
 
 local hitSound = sampleplayer.new("sound/brick_hit.wav")
 local destroySound = sampleplayer.new("sound/brick_destroy.wav")
+local spawnBallSound = sampleplayer.new("sound/ball_start.wav")
+local slowSound = sampleplayer.new("sound/slow_down.wav")
+local speedSound = sampleplayer.new("sound/speed_up.wav")
 
 local brickWidth = 12
 local brickHeight = 25
@@ -77,6 +80,7 @@ local function destroyBrick(brick)
     if brick.type == BrickType.Ball then
         -- should randomize the direction eventually
         CreateBall(brick.position, vector2D.new(BallMinVelocity, 5))
+        spawnBallSound:play()
     elseif brick.type == BrickType.Demon then
         -- hell in a cell
         BrickSpawnTimerRate = 500
@@ -99,8 +103,10 @@ function OnBrickHit(brick, ball)
 
     -- apply any effects on the ball
     if brick.type == BrickType.Slow then
+        slowSound:play()
         ball.velocity *= 0.75
     elseif brick.type == BrickType.Speed then
+        speedSound:play()
         ball.velocity *= 1.3
     end
 

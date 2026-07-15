@@ -5,6 +5,8 @@ local vector2D <const> = playdate.geometry.vector2D
 local sampleplayer <const> = playdate.sound.sampleplayer
 
 local paddleHitSound = sampleplayer.new("sound/paddle_hit.wav")
+local ballLostSound = sampleplayer.new("sound/ball_lost.wav")
+local wallHitSound = sampleplayer.new("sound/wallhit.wav")
 
 local ballSize = 8
 
@@ -63,6 +65,7 @@ local function bounce_off_obstacles(ball, newPosition)
     -- check if it has collided with the edge of the screen
     if (newPosition.dx + ballSize/2 > BallBounds[2].dx) then
         ball.velocity.dx = -ball.velocity.dx * wallSpeedModifier
+        wallHitSound:play()
         return true
     end
 
@@ -70,6 +73,7 @@ local function bounce_off_obstacles(ball, newPosition)
        (newPosition.dy + ballSize/2 > BallBounds[2].dy) 
     then
         ball.velocity.dy = -ball.velocity.dy * wallSpeedModifier
+        wallHitSound:play()
         return true
     end
 
@@ -110,6 +114,7 @@ function UpdateBall(ball)
 
     -- ball has gone behind the paddle
     if ball.position.dx < -30 then
+        ballLostSound:play()
         DestroyBall(ball)
     end
 end

@@ -44,6 +44,8 @@ BrickType = {
 
 local logoImage = gfx.image.new("images/logo.png")
 local hardImage = gfx.image.new("images/hardexclamation.png")
+GameStart = sampleplayer.new("sound/game_start.wav")
+GameOver = sampleplayer.new("sound/game_over.wav")
 HardMusic = playdate.sound.fileplayer.new("sound/hardmode_music.mp3")
 DemonCanSpawn = false
 
@@ -189,6 +191,7 @@ function clamp(value, min, max)
 end
 
 function StartIntroAnimation()
+    GameStart:play()
     title_screen = false
     intro_animating = true
     introProgress = 0
@@ -408,6 +411,7 @@ function playdate.update()
     -- check for game over after updating physics
     if playing_game and CheckGameOver() then
         game_over = true
+        GameOver:play()
         -- trigger leaderboard check right when the game ends
         UpdateLeaderboard(BricksDestroyed)
     end
