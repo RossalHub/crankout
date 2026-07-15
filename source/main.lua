@@ -262,6 +262,9 @@ function playdate.update()
 
     -- title screen state
     if title_screen then
+        -- updates the background so that the stars are also in the title screen
+        gfx.sprite.update()
+
         if logoImage then
             local w, h = logoImage:getSize()
             logoImage:draw(200 - w/2, 10) 
