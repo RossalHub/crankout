@@ -4,13 +4,13 @@ local gfx <const> = playdate.graphics
 
 local animationImagetable = gfx.imagetable.new("images/ship-table-37-30.png")
 local paddleWidth = 20
-local paddleHeight = 32
+local paddleHeight = 36
 local frameTime = 50
 
 function CreatePaddle()
     local animationLoop = gfx.animation.loop.new(frameTime, animationImagetable, true)
     local sprite = gfx.sprite.new(animationLoop:image())
-    sprite:setCollideRect(37-paddleWidth, 0, paddleWidth, paddleHeight)
+    sprite:setCollideRect(37-paddleWidth, -3, paddleWidth, paddleHeight)
     sprite:moveTo(24, (SCREEN_SIZE.dy - 40) / 2)
 
     sprite:setGroups(PADDLE_GROUP)
