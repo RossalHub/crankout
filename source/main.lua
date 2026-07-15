@@ -359,7 +359,6 @@ function playdate.update()
     if game_over then
         -- keep drawing frozen game behind the UI
         HardMusic:stop()
-        DemonCanSpawn = false
         gfx.sprite.update()
         UIBoxImage:draw(0,0)
         gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
@@ -386,6 +385,7 @@ function playdate.update()
         if playdate.buttonJustPressed(playdate.kButtonA) then
             ResetGame(false) -- just reset the game
         elseif playdate.buttonJustPressed(playdate.kButtonB) then
+            DemonCanSpawn = false
             ResetGame(true)  -- go back to title screen
         end
         
