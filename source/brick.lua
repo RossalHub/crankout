@@ -120,8 +120,8 @@ function OnBrickHit(brick, ball)
 end
 
 local function GetRandomBrickType()
-    --2% chance to create demon
-    if math.random() < 0.02 then
+    --1% chance to create demon
+    if math.random() < 0.01 then
         return BrickType.Demon
     --20% chance to create gap
     elseif math.random() < 0.20 then 
