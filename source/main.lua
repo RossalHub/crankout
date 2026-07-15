@@ -234,8 +234,7 @@ function CheckGameOver()
 end
 
 -- clears board and restarts
-function ResetGame()
-    BallMinVelocity = 2
+function ResetGame(returnToTitle)
     for i = #Balls, 1, -1 do DestroyBall(Balls[i]) end
     for i = #Bricks, 1, -1 do
         gfx.sprite.remove(Bricks[i].sprite)
@@ -254,12 +253,18 @@ function ResetGame()
         BrickSpawnTimer = nil
     end
     
-    -- restart animation on retry
-    uiYOffset = -42
-    paddleXOffset = -50
-    brickXOffset = 100
-    StartIntroAnimation()
     game_over = false
+    playing_game = false
+    
+    if returnToTitle then
+        title_screen = true
+    else
+        -- restart animation on retry
+        uiYOffset = -42
+        paddleXOffset = -50
+        brickXOffset = 100
+        StartIntroAnimation()
+    end
 end
 
 -- playdate.update function is required in every project!
@@ -353,12 +358,14 @@ function playdate.update()
         -- draw leaderboard with new! flag enabled
         DrawLeaderboard(65, true)
         
-        gfx.drawTextAligned("Press A to Try Again!", 200, 195, kTextAlignment.center)
+        gfx.drawTextAligned("A: Try Again!   B: Title Screen", 200, 195, kTextAlignment.center)
         gfx.setImageDrawMode(gfx.kDrawModeCopy)
         
-        -- A button to reset the game
+        -- Button inputs for Game Over screen
         if playdate.buttonJustPressed(playdate.kButtonA) then
-            ResetGame()
+            ResetGame(false) -- just reset the game
+        elseif playdate.buttonJustPressed(playdate.kButtonB) then
+            ResetGame(true)  -- go back to title screen
         end
         
         -- return early so physics don't update while game is over
