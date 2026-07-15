@@ -358,7 +358,8 @@ function playdate.update()
     -- game over state
     if game_over then
         -- keep drawing frozen game behind the UI
-        HardMusic:stop()
+        HardMusic:pause()
+        HardMusic:setOffset(0)
         gfx.sprite.update()
         UIBoxImage:draw(0,0)
         gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
