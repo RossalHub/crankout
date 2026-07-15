@@ -46,6 +46,7 @@ local logoImage = gfx.image.new("images/logo.png")
 
 -- Define ball variables
 BallBounds = {vector2D.new(0,40), SCREEN_SIZE} -- Used as walls for ball
+BallMinVelocity = 2
 
 -- load in Bricks
 local brickWidth = 12
@@ -177,6 +178,10 @@ local function lerp(start, finish, t)
     return start + (finish - start) * t
 end
 
+function clamp(value, min, max)
+    return math.max(math.min(value, max), min)
+end
+
 function StartIntroAnimation()
     title_screen = false
     intro_animating = true
@@ -229,6 +234,7 @@ end
 
 -- clears board and restarts
 function ResetGame()
+    BallMinVelocity = 2
     for i = #Balls, 1, -1 do DestroyBall(Balls[i]) end
     for i = #Bricks, 1, -1 do
         gfx.sprite.remove(Bricks[i].sprite)

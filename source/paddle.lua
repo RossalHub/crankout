@@ -43,6 +43,7 @@ function UpdatePaddle(paddle)
     local crankChange = pd.getCrankChange()
     local crankPosition = pd.getCrankPosition()
     local x, y = paddle.sprite:getPosition()
+    --updates position based on where crank is
     if IsCrankBehind() then
         y = topBoundary + crankPosition * 220/bottomBoundary
     else

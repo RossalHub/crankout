@@ -75,7 +75,7 @@ local function destroyBrick(brick)
 
     if brick.type == BrickType.Ball then
         -- should randomize the direction eventually
-        CreateBall(brick.position, vector2D.new(5, 5))
+        CreateBall(brick.position, vector2D.new(BallMinVelocity, 5))
     end
 
     for i = 1, #Bricks do
@@ -136,12 +136,13 @@ function ShiftBricksLeft()
         brick.position.dx -= brickWidth
         brick.sprite:moveTo(brick.position.dx, brick.position.dy)
 
-        -- edge case if brick goes off the left side of the screen
-        if brick.position.dx < -(brickWidth / 2) then
+        -- edge case if brick goes too far left
+        if brick.position.dx < 120 then
             gfx.sprite.remove(brick.sprite)
             table.remove(Bricks, i)
         end
     end
+    BallMinVelocity += 0.25
 end
 
 -- spawns new column of bricks on the right side

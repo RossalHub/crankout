@@ -46,14 +46,14 @@ local function bounce_off_obstacles(ball, newPosition)
             ball.velocity.dx = math.abs(ball.velocity.dx)
             local _, paddleY = sprite:getPosition()
             ball.position.dx = 50
-            local offset = (ball.position.dy - paddleY) / 24
+            local offset = (ball.position.dy - paddleY) / 12
             ball.velocity.dy += offset * 2
-            local crankChange = playdate.getCrankChange()
-            if IsCrankBehind() and crankChange > 2.5 then
-                ball.velocity.dy = crankChange/10
-            elseif not IsCrankBehind() and crankChange > 2.5 then
-                ball.velocity.dy = -crankChange/10
-            end
+            -- local crankChange = playdate.getCrankChange()
+            -- if IsCrankBehind() and crankChange > 2.5 then
+            --     ball.velocity.dy = crankChange/10
+            -- elseif not IsCrankBehind() and crankChange > 2.5 then
+            --     ball.velocity.dy = -crankChange/10
+            -- end
             paddleHitSound:play()
             break
         end
@@ -99,8 +99,11 @@ function UpdateBall(ball)
     local newPosition = vector2D.new(ball.position.dx + ball.velocity.dx, ball.position.dy + ball.velocity.dy)
     -- this will update the velocity of the ball if it would hit a wall at the new position
     bounce_off_obstacles(ball ,newPosition)
-
-    ball.position.dx += ball.velocity.dx
+    if ball.velocity.dx >= 0 then
+        ball.position.dx += clamp(ball.velocity.dx, BallMinVelocity, 20)
+    else
+        ball.position.dx += clamp(ball.velocity.dx, -20, -BallMinVelocity)
+    end
     ball.position.dy += ball.velocity.dy
     ball.sprite:moveTo(ball.position.dx, ball.position.dy)
 
