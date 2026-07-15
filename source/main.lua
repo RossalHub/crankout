@@ -43,11 +43,13 @@ BrickType = {
 }
 
 local logoImage = gfx.image.new("images/logo.png")
+HardMusic = playdate.sound.fileplayer.new("sound/hardmode_music.mp3")
 
 
 -- Define ball variables
 BallBounds = {vector2D.new(0,40), SCREEN_SIZE} -- Used as walls for ball
 BallMinVelocity = 2
+BrickSpawnTimerRate = 5000
 
 -- load in Bricks
 local brickWidth = 12
@@ -114,12 +116,13 @@ end
 
 -- background
 BgOffset = 0
+BgDelta = 1
 local bgSpriteTable = gfx.imagetable.new("images/stars-table-400-200.png")
 local bgAnimationLoop = gfx.animation.loop.new(250, bgSpriteTable, true)
 local function drawBg(x, y, width, height)
     bgAnimationLoop:draw(-BgOffset%400, 40)
     bgAnimationLoop:draw(-BgOffset%400-400, 40)
-    BgOffset += 1
+    BgOffset += BgDelta
 end
 
 gfx.sprite.setBackgroundDrawingCallback(drawBg)
@@ -235,6 +238,9 @@ end
 
 -- clears board and restarts
 function ResetGame(returnToTitle)
+    BallMinVelocity = 2
+    BrickSpawnTimerRate = 5000
+    BgDelta = 1
     for i = #Balls, 1, -1 do DestroyBall(Balls[i]) end
     for i = #Bricks, 1, -1 do
         gfx.sprite.remove(Bricks[i].sprite)
@@ -339,6 +345,7 @@ function playdate.update()
     -- game over state
     if game_over then
         -- keep drawing frozen game behind the UI
+        HardMusic:stop()
         gfx.sprite.update()
         UIBoxImage:draw(0,0)
         gfx.setImageDrawMode(gfx.kDrawModeFillWhite)

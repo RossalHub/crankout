@@ -15,7 +15,6 @@ local sampleplayer <const> = playdate.sound.sampleplayer
 
 local hitSound = sampleplayer.new("sound/brick_hit.wav")
 local destroySound = sampleplayer.new("sound/brick_destroy.wav")
-local ballBrickSpawned = false
 
 local brickWidth = 12
 local brickHeight = 25
@@ -78,6 +77,12 @@ local function destroyBrick(brick)
     if brick.type == BrickType.Ball then
         -- should randomize the direction eventually
         CreateBall(brick.position, vector2D.new(BallMinVelocity, 5))
+    elseif brick.type == BrickType.Demon then
+        -- hell in a cell
+        BrickSpawnTimerRate = 500
+        BgDelta = 4
+        HardMusic:play(0)
+        StartBrickSpawner()
     end
 
     for i = 1, #Bricks do
@@ -115,8 +120,11 @@ function OnBrickHit(brick, ball)
 end
 
 local function GetRandomBrickType()
-    -- 20% chance to create gap
-    if math.random() < 0.20 then 
+    --2% chance to create demon
+    if math.random() < 0.02 then
+        return BrickType.Demon
+    --20% chance to create gap
+    elseif math.random() < 0.20 then 
         return nil 
     end
 
@@ -169,13 +177,12 @@ end
 
 -- sets up brick timer
 local brickSpawnTimer = nil
-
 function StartBrickSpawner()
     if brickSpawnTimer then 
         brickSpawnTimer:remove() 
     end
     
     -- 20,000 milliseconds = 20 seconds
-    brickSpawnTimer = playdate.timer.new(5000, SpawnNewBrickColumn)
+    brickSpawnTimer = playdate.timer.new(BrickSpawnTimerRate, SpawnNewBrickColumn)
     brickSpawnTimer.repeats = true
 end
