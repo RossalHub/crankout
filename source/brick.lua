@@ -7,13 +7,15 @@ local images = {
     gfx.image.new("images/brick3.png"),
     gfx.image.new("images/ball_brick.png"),
     gfx.image.new("images/speed_brick.png"),
-    gfx.image.new("images/slow_brick.png")
+    gfx.image.new("images/slow_brick.png"),
+    gfx.image.new("images/demon_brick.png")
 }
 local vector2D <const> = playdate.geometry.vector2D
 local sampleplayer <const> = playdate.sound.sampleplayer
 
 local hitSound = sampleplayer.new("sound/brick_hit.wav")
 local destroySound = sampleplayer.new("sound/brick_destroy.wav")
+local ballBrickSpawned = false
 
 local brickWidth = 12
 local brickHeight = 25
@@ -143,6 +145,7 @@ function ShiftBricksLeft()
         end
     end
     BallMinVelocity += 0.25
+    BallMinVelocity = clamp(BallMinVelocity, 2, 8)
 end
 
 -- spawns new column of bricks on the right side

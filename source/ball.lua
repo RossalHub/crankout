@@ -100,9 +100,9 @@ function UpdateBall(ball)
     -- this will update the velocity of the ball if it would hit a wall at the new position
     bounce_off_obstacles(ball ,newPosition)
     if ball.velocity.dx >= 0 then
-        ball.position.dx += clamp(ball.velocity.dx, BallMinVelocity, 20)
+        ball.position.dx += clamp(ball.velocity.dx, BallMinVelocity, 999)
     else
-        ball.position.dx += clamp(ball.velocity.dx, -20, -BallMinVelocity)
+        ball.position.dx += clamp(ball.velocity.dx, -999, -BallMinVelocity)
     end
     ball.position.dy += ball.velocity.dy
     ball.sprite:moveTo(ball.position.dx, ball.position.dy)

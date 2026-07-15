@@ -39,6 +39,7 @@ BrickType = {
     Ball = 4, -- spawns a ball when destroyed, 1 hit
     Speed = 5, -- gives the ball a large speed increase, 1 hit
     Slow = 6, -- slows down the ball when hit, 1 hit
+    Demon = 7 -- We knew the world would not be the same. A few people laughed; a few people cried. Most people were silent. I remembered the line from the Hindu scripture, the Bhagavad Gita... 'Now I am become Death, the destroyer of worlds.' I suppose we all thought that, one way or another.
 }
 
 local logoImage = gfx.image.new("images/logo.png")
@@ -288,6 +289,11 @@ function playdate.update()
         if pd.isCrankDocked() then
             pd.ui.crankIndicator:draw()
         else
+            gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+            gfx.drawTextAligned("*[A] TO START*", 325, 200, kTextAlignment.center)
+            gfx.setImageDrawMode(gfx.kDrawModeCopy)
+        end
+        if not pd.isCrankDocked() and playdate.buttonIsPressed(playdate.kButtonA) then
             StartIntroAnimation()
         end
         return
