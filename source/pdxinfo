@@ -1,6 +1,6 @@
-name=Game
-author=
-description=
+name=Crankout
+author=Alex Ross, Matthew Precious, Lachlann MacUisdin, Quinn Trusler
+description=Crank your ship to break the bricks!
 bundleID=
 version=1.0.0
 buildNumber=1
