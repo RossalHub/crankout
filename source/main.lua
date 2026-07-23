@@ -285,10 +285,7 @@ function ResetGame(returnToTitle)
     BricksDestroyed = 0
     latestScoreRank = nil -- clear NEW! flag for the next round
     
-    if BrickSpawnTimer then 
-        BrickSpawnTimer:remove() 
-        BrickSpawnTimer = nil
-    end
+    StopBrickSpawner()
     
     game_over = false
     playing_game = false

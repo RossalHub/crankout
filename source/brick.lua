@@ -192,3 +192,10 @@ function StartBrickSpawner()
     brickSpawnTimer = playdate.timer.new(BrickSpawnTimerRate, SpawnNewBrickColumn)
     brickSpawnTimer.repeats = true
 end
+
+function StopBrickSpawner()
+    if brickSpawnTimer then
+        brickSpawnTimer:remove()
+        brickSpawnTimer = nil
+    end
+end
